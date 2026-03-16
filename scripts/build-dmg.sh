@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+export DEVELOPER_DIR="${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer}"
 
 # ── Configuration ──────────────────────────────────────────────
 SCHEME="QuickInput"
@@ -20,6 +21,15 @@ cleanup() {
     fi
 }
 trap cleanup EXIT
+
+# ── Generate Xcode project ───────────────────────────────────
+if command -v xcodegen &>/dev/null; then
+    echo "==> Generating Xcode project..."
+    xcodegen generate --spec "${PROJECT_DIR}/QuickInput/project.yml" --project "${PROJECT_DIR}/QuickInput"
+else
+    echo "Error: xcodegen not found. Install with: brew install xcodegen" >&2
+    exit 1
+fi
 
 # ── Build ──────────────────────────────────────────────────────
 echo "==> Building ${APP_NAME} (Release)..."
