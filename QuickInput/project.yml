@@ -1,0 +1,60 @@
+name: QuickInput
+options:
+  deploymentTarget:
+    macOS: "13.0"
+  bundleIdPrefix: me.xupeng
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MACOSX_DEPLOYMENT_TARGET: "13.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+targets:
+  QuickInput:
+    type: application
+    platform: macOS
+    sources:
+      - path: QuickInput
+        excludes:
+          - QuickInput.entitlements
+    info:
+      path: QuickInput/Info.plist
+      properties:
+        LSUIElement: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: me.xupeng.QuickInput
+        INFOPLIST_FILE: QuickInput/Info.plist
+        PRODUCT_NAME: Quick Input
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: ""
+        CODE_SIGN_IDENTITY: "-"
+  QuickInputTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - QuickInputTests
+    dependencies:
+      - target: QuickInput
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: me.xupeng.QuickInputTests
+schemes:
+  QuickInput:
+    build:
+      targets:
+        QuickInput: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - QuickInputTests
+  QuickInputTests:
+    build:
+      targets:
+        QuickInput: all
+        QuickInputTests: [test]
+    test:
+      config: Debug
+      targets:
+        - QuickInputTests
