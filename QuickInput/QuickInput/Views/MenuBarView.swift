@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MenuBarView: View {
     @Environment(NoteStore.self) private var noteStore
+    @Environment(\.openSettings) private var openSettings
     @EnvironmentObject var hotkeyManager: GlobalHotkeyManager
     var onNewNote: () -> Void
 
@@ -46,7 +47,10 @@ struct MenuBarView: View {
             }
 
             Divider()
-            SettingsLink { Text("Settings...") }
+            Button("Settings...") {
+                NSApp.activate(ignoringOtherApps: true)
+                openSettings()
+            }
             Button("Quit") { NSApplication.shared.terminate(nil) }
         }
         .padding(8)
