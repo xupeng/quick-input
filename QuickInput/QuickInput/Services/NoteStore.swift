@@ -3,6 +3,10 @@ import Network
 import SwiftData
 import SwiftUI
 
+extension Notification.Name {
+    static let notionSettingsChanged = Notification.Name("notionSettingsChanged")
+}
+
 @MainActor
 @Observable
 final class NoteStore {
@@ -19,6 +23,7 @@ final class NoteStore {
         resetStaleSyncing()
         refreshCounts()
         startNetworkMonitor()
+        observeSettingsChanges()
     }
 
     func rebuildNotionService() {
@@ -106,12 +111,29 @@ final class NoteStore {
                 note.lastError = "\(error)"
                 try? modelContext.save()
             }
+        } catch let urlError as URLError where urlError.code == .notConnectedToInternet
+            || urlError.code == .networkConnectionLost
+            || urlError.code == .dataNotAllowed {
+            // Network unreachable: keep as pending, silent wait for reconnection
+            note.syncStatus = .pending
+            try? modelContext.save()
         } catch {
             note.syncStatus = .failed
             note.lastError = error.localizedDescription
             try? modelContext.save()
         }
         refreshCounts()
+    }
+
+    // Rebuild NotionService when settings change
+    private func observeSettingsChanges() {
+        NotificationCenter.default.addObserver(
+            forName: .notionSettingsChanged,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.rebuildNotionService()
+        }
     }
 
     // Auto-retry when network comes back online

@@ -46,9 +46,11 @@ struct SettingsView: View {
         .frame(width: 450, height: 300)
         .onChange(of: token) { _, newValue in
             KeychainStore.notionToken = newValue.isEmpty ? nil : newValue
+            NotificationCenter.default.post(name: .notionSettingsChanged, object: nil)
         }
         .onChange(of: databaseId) { _, newValue in
             UserDefaults.standard.set(newValue, forKey: "notionDatabaseId")
+            NotificationCenter.default.post(name: .notionSettingsChanged, object: nil)
         }
     }
 

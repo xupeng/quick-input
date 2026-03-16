@@ -11,7 +11,7 @@ enum NotionError: Error, Equatable {
 final class NotionService: Sendable {
     private let token: String
     private let databaseId: String
-    private nonisolated(unsafe) let session: URLSession
+    private let session: URLSession
     private static let apiVersion = "2026-03-11"
     private static let baseURL = "https://api.notion.com/v1"
 
