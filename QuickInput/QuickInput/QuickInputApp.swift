@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 @main
 struct QuickInputApp: App {
@@ -10,5 +11,6 @@ struct QuickInputApp: App {
                 NSApplication.shared.terminate(nil)
             }
         }
+        .modelContainer(for: Note.self)
     }
 }
