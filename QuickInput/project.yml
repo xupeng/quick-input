@@ -38,6 +38,8 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: me.xupeng.QuickInputTests
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Quick Input.app/Contents/MacOS/Quick Input"
+        GENERATE_INFOPLIST_FILE: YES
 schemes:
   QuickInput:
     build:
