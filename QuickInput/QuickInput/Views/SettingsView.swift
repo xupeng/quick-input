@@ -2,6 +2,7 @@ import ServiceManagement
 import SwiftUI
 
 struct SettingsView: View {
+    @EnvironmentObject var hotkeyManager: GlobalHotkeyManager
     @State private var token: String = ""
     @State private var databaseId: String = UserDefaults.standard.string(forKey: "notionDatabaseId") ?? ""
     @State private var launchAtLogin: Bool = SMAppService.mainApp.status == .enabled
@@ -31,6 +32,41 @@ struct SettingsView: View {
                 }
             }
 
+            Section("Shortcuts") {
+                if !hotkeyManager.isAccessibilityGranted {
+                    HStack {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+                        Text("Accessibility access required for global hotkey")
+                            .font(.caption)
+                    }
+                    Button("Grant Accessibility Access") {
+                        hotkeyManager.requestAccessibility()
+                    }
+                }
+                LabeledContent("Global Hotkey") {
+                    KeyRecorderView(
+                        binding: $hotkeyManager.binding,
+                        isRecording: Binding(
+                            get: { hotkeyManager.isRecordingHotkey },
+                            set: { hotkeyManager.setRecording($0) }
+                        )
+                    )
+                    .frame(width: 160, height: 24)
+                }
+                if !hotkeyManager.binding.isValid {
+                    Text("Shortcut must include ⌘ or ⌃")
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+                if hotkeyManager.binding != .default {
+                    Button("Reset to Default") {
+                        hotkeyManager.binding = .default
+                    }
+                    .font(.caption)
+                }
+            }
+
             Section("General") {
                 Toggle("Launch at Login", isOn: $launchAtLogin)
                     .onChange(of: launchAtLogin) { _, newValue in
@@ -43,7 +79,7 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 450, height: 300)
+        .frame(width: 450, height: 380)
         .onChange(of: token) { _, newValue in
             KeychainStore.notionToken = newValue.isEmpty ? nil : newValue
             NotificationCenter.default.post(name: .notionSettingsChanged, object: nil)

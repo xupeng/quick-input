@@ -8,9 +8,40 @@ final class GlobalHotkeyManager: ObservableObject {
     var onHotkey: (@Sendable @MainActor () -> Void)?
 
     @Published var isAccessibilityGranted = false
+    @Published var isRecordingHotkey = false
+
+    private static let userDefaultsKey = "globalHotkeyBinding"
+
+    // Shadow properties for CGEventTap callback (runs off main actor)
+    private nonisolated(unsafe) var _bindingKeyCode: UInt16 = HotkeyBinding.default.keyCode
+    private nonisolated(unsafe) var _bindingModifiers: HotkeyBinding.ModifierFlags = HotkeyBinding.default.modifiers
+    private nonisolated(unsafe) var _isRecording: Bool = false
+
+    @Published var binding: HotkeyBinding = .default {
+        didSet {
+            _bindingKeyCode = binding.keyCode
+            _bindingModifiers = binding.modifiers
+            saveBinding()
+        }
+    }
 
     init() {
+        loadBinding()
         checkAccessibility()
+    }
+
+    private func loadBinding() {
+        guard let data = UserDefaults.standard.data(forKey: Self.userDefaultsKey),
+              let decoded = try? JSONDecoder().decode(HotkeyBinding.self, from: data)
+        else { return }
+        binding = decoded
+        _bindingKeyCode = decoded.keyCode
+        _bindingModifiers = decoded.modifiers
+    }
+
+    private func saveBinding() {
+        guard let data = try? JSONEncoder().encode(binding) else { return }
+        UserDefaults.standard.set(data, forKey: Self.userDefaultsKey)
     }
 
     @discardableResult
@@ -40,6 +71,11 @@ final class GlobalHotkeyManager: ObservableObject {
         }
     }
 
+    func setRecording(_ recording: Bool) {
+        isRecordingHotkey = recording
+        _isRecording = recording
+    }
+
     func start() {
         guard isAccessibilityGranted, eventTap == nil else { return }
 
@@ -47,12 +83,21 @@ final class GlobalHotkeyManager: ObservableObject {
             guard let refcon else { return Unmanaged.passUnretained(event) }
             let manager = Unmanaged<GlobalHotkeyManager>.fromOpaque(refcon).takeUnretainedValue()
 
+            // Skip interception while recording a new hotkey
+            if manager._isRecording {
+                return Unmanaged.passUnretained(event)
+            }
+
             if event.type == .keyDown {
                 let flags = event.flags
                 let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
 
-                // Cmd+Shift+N: keyCode 45 = N
-                if flags.contains(.maskCommand) && flags.contains(.maskShift) && keyCode == 45 {
+                let bindingToMatch = HotkeyBinding(
+                    keyCode: manager._bindingKeyCode,
+                    modifiers: manager._bindingModifiers
+                )
+
+                if bindingToMatch.matches(flags: flags, keyCode: keyCode) {
                     DispatchQueue.main.async { [weak manager] in
                         manager?.onHotkey?()
                     }

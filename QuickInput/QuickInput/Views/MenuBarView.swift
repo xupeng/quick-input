@@ -2,12 +2,16 @@ import SwiftUI
 
 struct MenuBarView: View {
     @Environment(NoteStore.self) private var noteStore
+    @EnvironmentObject var hotkeyManager: GlobalHotkeyManager
     var onNewNote: () -> Void
+
+    private var hotkeyDisplayString: String {
+        hotkeyManager.binding.displayString
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Button("New Note (\u{2318}+Shift+N)") { onNewNote() }
-                .keyboardShortcut("n", modifiers: [.command, .shift])
+            Button("New Note (\(hotkeyDisplayString))") { onNewNote() }
 
             Divider()
 

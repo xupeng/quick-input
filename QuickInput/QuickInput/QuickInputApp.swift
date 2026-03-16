@@ -23,6 +23,7 @@ struct QuickInputApp: App {
                 if let noteStore {
                     MenuBarView(onNewNote: toggleInputPanel)
                         .environment(noteStore)
+                        .environmentObject(hotkeyManager)
                 } else {
                     Text("Loading...")
                 }
@@ -40,6 +41,7 @@ struct QuickInputApp: App {
 
         Settings {
             SettingsView()
+                .environmentObject(hotkeyManager)
         }
     }
 
@@ -56,8 +58,6 @@ struct QuickInputApp: App {
 
         if hotkeyManager.checkAccessibility() {
             hotkeyManager.start()
-        } else {
-            hotkeyManager.requestAccessibility()
         }
 
         store.retryAllFailed()
