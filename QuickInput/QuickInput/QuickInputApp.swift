@@ -1,16 +1,73 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 @main
 struct QuickInputApp: App {
-    var body: some Scene {
-        MenuBarExtra("Quick Input", systemImage: "note.text") {
-            Text("Quick Input is running")
-            Divider()
-            Button("Quit") {
-                NSApplication.shared.terminate(nil)
-            }
+    @State private var noteStore: NoteStore?
+    @StateObject private var hotkeyManager = GlobalHotkeyManager()
+    @StateObject private var panelManager = FloatingPanelManager()
+
+    private let modelContainer: ModelContainer
+
+    init() {
+        do {
+            modelContainer = try ModelContainer(for: Note.self)
+        } catch {
+            fatalError("Failed to create ModelContainer: \(error)")
         }
-        .modelContainer(for: Note.self)
+    }
+
+    var body: some Scene {
+        MenuBarExtra {
+            Group {
+                if let noteStore {
+                    MenuBarView(onNewNote: toggleInputPanel)
+                        .environment(noteStore)
+                } else {
+                    Text("Loading...")
+                }
+            }
+            .onAppear { setupOnFirstAppear() }
+        } label: {
+            let badge = (noteStore?.failedCount ?? 0) + (noteStore?.pendingCount ?? 0)
+            Label(
+                badge > 0 ? "\(badge)" : "Quick Input",
+                systemImage: (noteStore?.failedCount ?? 0) > 0
+                    ? "exclamationmark.triangle" : "note.text"
+            )
+        }
+        .modelContainer(modelContainer)
+
+        Settings {
+            SettingsView()
+        }
+    }
+
+    private func setupOnFirstAppear() {
+        guard noteStore == nil else { return }
+
+        let context = ModelContext(modelContainer)
+        let store = NoteStore(modelContext: context)
+        noteStore = store
+
+        hotkeyManager.onHotkey = { @MainActor @Sendable in
+            self.toggleInputPanel()
+        }
+
+        if hotkeyManager.checkAccessibility() {
+            hotkeyManager.start()
+        } else {
+            hotkeyManager.requestAccessibility()
+        }
+
+        store.retryAllFailed()
+    }
+
+    private func toggleInputPanel() {
+        guard let noteStore else { return }
+        panelManager.toggle {
+            InputView(onDismiss: { panelManager.close() })
+                .environment(noteStore)
+        }
     }
 }
