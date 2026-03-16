@@ -40,7 +40,24 @@ final class FloatingPanel: NSPanel {
         } else {
             makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
+            focusTextView()
         }
+    }
+
+    private func focusTextView() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self, let textView = self.firstTextView(in: self.contentView) else { return }
+            self.makeFirstResponder(textView)
+        }
+    }
+
+    private func firstTextView(in view: NSView?) -> NSTextView? {
+        guard let view else { return nil }
+        if let textView = view as? NSTextView { return textView }
+        for subview in view.subviews {
+            if let found = firstTextView(in: subview) { return found }
+        }
+        return nil
     }
 }
 

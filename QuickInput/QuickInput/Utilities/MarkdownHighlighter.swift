@@ -22,9 +22,12 @@ enum MarkdownHighlighter {
         let baseColor = NSColor.labelColor
 
         // Reset to base style
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = 4
         textStorage.addAttributes([
             .font: baseFont,
-            .foregroundColor: baseColor
+            .foregroundColor: baseColor,
+            .paragraphStyle: paragraphStyle
         ], range: fullRange)
 
         let nsText = text as NSString
@@ -33,7 +36,13 @@ enum MarkdownHighlighter {
         applyPattern(#"^(#{1,3})\s+(.+)$"#, to: nsText, in: textStorage) { range in
             let level = nsText.substring(with: range).prefix(while: { $0 == "#" }).count
             let size: CGFloat = [24, 20, 17][min(level - 1, 2)]
-            return [.font: NSFont.monospacedSystemFont(ofSize: size, weight: .bold)]
+            let headingParagraph = NSMutableParagraphStyle()
+            headingParagraph.lineSpacing = 4
+            headingParagraph.paragraphSpacing = CGFloat(12 - (level - 1) * 2)
+            return [
+                .font: NSFont.monospacedSystemFont(ofSize: size, weight: .bold),
+                .paragraphStyle: headingParagraph
+            ]
         }
 
         // Bold: **text**

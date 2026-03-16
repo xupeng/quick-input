@@ -4,6 +4,15 @@ import SwiftUI
 final class SubmittableTextView: NSTextView {
     var onSubmit: (() -> Void)?
 
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        if let window = window {
+            DispatchQueue.main.async {
+                window.makeFirstResponder(self)
+            }
+        }
+    }
+
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
         if event.modifierFlags.contains(.command) && event.keyCode == 36 {
             onSubmit?()
@@ -34,6 +43,10 @@ struct MarkdownTextEditor: NSViewRepresentable {
         let textView = SubmittableTextView(frame: .zero, textContainer: textContainer)
         textView.isRichText = false
         textView.font = NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
+
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = 4
+        textView.defaultParagraphStyle = paragraphStyle
         textView.textColor = .labelColor
         textView.backgroundColor = .textBackgroundColor
         textView.isAutomaticQuoteSubstitutionEnabled = false
