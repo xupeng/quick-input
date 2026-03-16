@@ -3,7 +3,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var hotkeyManager: GlobalHotkeyManager
-    @State private var token: String = ""
+    @State private var token: String = UserDefaults.standard.string(forKey: "notionToken") ?? ""
     @State private var databaseId: String = UserDefaults.standard.string(forKey: "notionDatabaseId") ?? ""
     @State private var launchAtLogin: Bool = SMAppService.mainApp.status == .enabled
     @State private var testResult: String?
@@ -13,7 +13,6 @@ struct SettingsView: View {
         Form {
             Section("Notion Configuration") {
                 SecureField("API Token", text: $token)
-                    .onAppear { token = KeychainStore.notionToken ?? "" }
 
                 TextField("Database ID", text: $databaseId)
                     .help("32-character hex ID from your Notion database URL")
@@ -81,7 +80,7 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .frame(width: 450, height: 380)
         .onChange(of: token) { _, newValue in
-            KeychainStore.notionToken = newValue.isEmpty ? nil : newValue
+            UserDefaults.standard.set(newValue.isEmpty ? nil : newValue, forKey: "notionToken")
             NotificationCenter.default.post(name: .notionSettingsChanged, object: nil)
         }
         .onChange(of: databaseId) { _, newValue in

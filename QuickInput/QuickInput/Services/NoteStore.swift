@@ -27,7 +27,7 @@ final class NoteStore {
     }
 
     func rebuildNotionService() {
-        if let token = KeychainStore.notionToken,
+        if let token = UserDefaults.standard.string(forKey: "notionToken"),
            let dbId = UserDefaults.standard.string(forKey: "notionDatabaseId"),
            !token.isEmpty, !dbId.isEmpty {
             notionService = NotionService(token: token, databaseId: dbId)
