@@ -20,7 +20,7 @@ PADDING = 1
 THRESHOLD = 128  # below this = icon, above = background
 SIZES = {"MenuBarIcon.png": 16, "MenuBarIcon@2x.png": 32}
 
-src = Image.open(Path(__file__).parent / "new-logo.png").convert("L")
+src = Image.open(Path(__file__).parent.parent / "resources" / "logo.png").convert("L")
 
 # Dark pixels = icon shape, light pixels = background
 mask = src.point(lambda p: 255 if p < THRESHOLD else 0)

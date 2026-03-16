@@ -38,7 +38,7 @@ SIZES = [
 
 # ── Extract logo silhouette ───────────────────────────────────────────────────
 
-src = Image.open(Path(__file__).parent / "new-logo.png").convert("L")
+src = Image.open(Path(__file__).parent.parent / "resources" / "logo.png").convert("L")
 
 # Dark pixels = icon shape
 mask = src.point(lambda p: 255 if p < 128 else 0)
