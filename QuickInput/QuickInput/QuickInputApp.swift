@@ -31,11 +31,17 @@ struct QuickInputApp: App {
             .onAppear { setupOnFirstAppear() }
         } label: {
             let badge = (noteStore?.failedCount ?? 0) + (noteStore?.pendingCount ?? 0)
-            Label(
-                badge > 0 ? "\(badge)" : "Quick Input",
-                systemImage: (noteStore?.failedCount ?? 0) > 0
-                    ? "exclamationmark.triangle" : "note.text"
-            )
+            if (noteStore?.failedCount ?? 0) > 0 {
+                Label(
+                    badge > 0 ? "\(badge)" : "Quick Input",
+                    systemImage: "exclamationmark.triangle"
+                )
+            } else {
+                Label(
+                    badge > 0 ? "\(badge)" : "Quick Input",
+                    image: "MenuBarIcon"
+                )
+            }
         }
         .modelContainer(modelContainer)
 
