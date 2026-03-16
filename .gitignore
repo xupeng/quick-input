@@ -10,5 +10,8 @@ xcuserdata/
 # macOS
 .DS_Store
 
+# Local config
+Local.xcconfig
+
 # Claude Code
 .claude/settings.local.json

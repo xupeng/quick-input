@@ -31,9 +31,18 @@ else
     exit 1
 fi
 
+# ── Local signing config ─────────────────────────────────────
+XCCONFIG="${PROJECT_DIR}/QuickInput/Local.xcconfig"
+XCCONFIG_FLAG=""
+if [[ -f "${XCCONFIG}" ]]; then
+    XCCONFIG_FLAG="-xcconfig ${XCCONFIG}"
+    echo "==> Using local signing config: ${XCCONFIG}"
+fi
+
 # ── Build ──────────────────────────────────────────────────────
 echo "==> Building ${APP_NAME} (Release)..."
 xcodebuild clean build \
+    ${XCCONFIG_FLAG} \
     -project "${XCODEPROJ}" \
     -scheme "${SCHEME}" \
     -configuration Release \
