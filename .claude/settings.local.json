@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:developers.notion.com)",
+      "Bash(find . -maxdepth 2 -type f \\\\\\( -name \"*.json\" -o -name \"*.toml\" -o -name \"*.md\" -o -name \"*.yml\" -o -name \"*.yaml\" -o -name \".gitignore\" \\\\\\) 2>/dev/null | head -20)",
+      "mcp__web-reader__webReader",
+      "mcp__web-search-prime__web_search_prime",
+      "WebSearch",
+      "Bash(which xcodegen:*)",
+      "Bash(swift --version 2>/dev/null)",
+      "Bash(xcodebuild -version 2>/dev/null)"
+    ]
+  },
+  "prefersReducedMotion": true
+}
