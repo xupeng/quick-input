@@ -39,6 +39,12 @@ if [[ -f "${XCCONFIG}" ]]; then
     echo "==> Using local signing config: ${XCCONFIG}"
 fi
 
+# ── Unlock keychain for codesigning ──────────────────────────
+if [[ -n "${XCCONFIG_FLAG}" ]]; then
+    echo "==> Unlocking keychain for codesigning..."
+    security unlock-keychain login.keychain-db
+fi
+
 # ── Build ──────────────────────────────────────────────────────
 echo "==> Building ${APP_NAME} (Release)..."
 xcodebuild clean build \
